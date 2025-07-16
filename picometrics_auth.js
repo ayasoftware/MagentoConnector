@@ -1,4 +1,5 @@
 // Global definitions
+const scriptProperties = PropertiesService.getScriptProperties();
 const picoBearerToken = scriptProperties.getProperty('picometricsApiKey');
 const picoBaseUrl = scriptProperties.getProperty('picoBaseUrl');
 const DEBUG = true; // Set to true or false to enable/disable logging

@@ -164,25 +164,16 @@ function getData(request) {
     })
   );
 
-  try {
-    var orders = fetchOrders(request);
-    // check if request contains cart_id, then add abandoned carts info.
-    var abandonedCartsData = [];
-    console.log("request.fields: ", request.fields);
-    if (request.fields.some(field => field.name === "cart_id")) {
-      var abandonedCarts = fetchAbandonedCarts(request);
-      abandonedCartsData = getAbandonedCartsData(abandonedCarts, requestedFields);
-    }
-
-    var ordersData = getOrdersData(orders, requestedFields);
-  } catch (e) {
-    cc.newUserError()
-      .setDebugText("Error fetching data from API. Exception details: " + e)
-      .setText(
-        "The connector has encountered an unrecoverable error. Please try again later, or file an issue if this error persists."
-      )
-      .throwException();
+  var orders = fetchOrders(request);
+  // check if request contains cart_id, then add abandoned carts info.
+  var abandonedCartsData = [];
+  console.log("request.fields: ", request.fields);
+  if (request.fields.some(field => field.name === "cart_id")) {
+    var abandonedCarts = fetchAbandonedCarts(request);
+    abandonedCartsData = getAbandonedCartsData(abandonedCarts, requestedFields);
   }
+
+  var ordersData = getOrdersData(orders, requestedFields);
 
   return {
     schema: requestedFields.build(),
@@ -194,26 +185,21 @@ function getData(request) {
  * Fetches abandoned carts from Magento API.
  *
  * @param {Object} request Data request parameters.
- * @returns {string} Response text for UrlFetchApp.
+ * @returns {Object} The parsed JSON response from the API.
  */
 function fetchAbandonedCarts(request) {
   const magentoBaseUrl = request.configParams.magentoBaseUrl;
   const apiToken = request.configParams.apiToken;
 
-  // Validate input configuration
   if (!magentoBaseUrl || !apiToken) {
     sendUserError("Magento Base URL and API Token must be configured.");
-    return;
   }
-
-  console.log("fetchAbandonedCarts request: ", request);
 
   const cartsEndpoint = "/rest/V1/carts/search";
   const startDate = request.dateRange.startDate;
   const endDate =
-    request.dateRange.endDate || new Date().toISOString().split("T")[0]; // Default end date
+    request.dateRange.endDate || new Date().toISOString().split("T")[0];
 
-  // Build API request URL with filters
   const queryParams = [
     "searchCriteria[filter_groups][0][filters][0][field]=created_at",
     "searchCriteria[filter_groups][0][filters][0][value]=" + startDate,
@@ -236,12 +222,16 @@ function fetchAbandonedCarts(request) {
   };
 
   try {
-    // Fetch data from Magento API
-    var response = UrlFetchApp.fetch(fullUrl, options);
-    return response;
+    const response = UrlFetchApp.fetch(fullUrl, options);
+    const responseCode = response.getResponseCode();
+    const responseBody = response.getContentText();
+
+    if (responseCode !== 200) {
+      sendUserError('Error fetching abandoned carts. API responded with status ' + responseCode + ': ' + responseBody);
+    }
+    return JSON.parse(responseBody);
   } catch (error) {
-    sendUserError("Error fetching data: " + error.message);
-    return null;
+    sendUserError("Error fetching or parsing abandoned carts data: " + error.message);
   }
 }
 
@@ -249,24 +239,21 @@ function fetchAbandonedCarts(request) {
  * Gets response for UrlFetchApp.
  *
  * @param {Object} request Data request parameters.
- * @returns {string} Response text for UrlFetchApp.
+ * @returns {Object} The parsed JSON response from the API.
  */
 function fetchOrders(request) {
-  const magentoBaseUrl = request.configParams.magentoBaseUrl; // "https://boutique.milleniummicro.ca/sto_fr";
-  const apiToken = request.configParams.apiToken; //"Ttrs413wvfnbzbvxsbreu2cy3wu9tcnx"
+  const magentoBaseUrl = request.configParams.magentoBaseUrl;
+  const apiToken = request.configParams.apiToken;
 
-  // Validate input configuration
   if (!magentoBaseUrl || !apiToken) {
     sendUserError("Magento Base URL and API Token must be configured.");
-    return;
   }
 
   const ordersEndpoint = "/rest/V1/orders";
   const startDate = request.dateRange.startDate;
   const endDate =
-    request.dateRange.endDate || new Date().toISOString().split("T")[0]; // Default end date
+    request.dateRange.endDate || new Date().toISOString().split("T")[0];
 
-  // Build API request URL with filters
   const queryParams = [
     "searchCriteria[filter_groups][0][filters][0][field]=created_at",
     "searchCriteria[filter_groups][0][filters][0][value]=" + startDate,
@@ -286,12 +273,16 @@ function fetchOrders(request) {
   };
 
   try {
-    // Fetch data from Magento API
-    var response = UrlFetchApp.fetch(fullUrl, options);
-    return response;
+    const response = UrlFetchApp.fetch(fullUrl, options);
+    const responseCode = response.getResponseCode();
+    const responseBody = response.getContentText();
+
+    if (responseCode !== 200) {
+      sendUserError('Error fetching orders. API responded with status ' + responseCode + ': ' + responseBody);
+    }
+    return JSON.parse(responseBody);
   } catch (error) {
-    sendUserError("Error fetching data: " + error.message);
-    return null;
+    sendUserError("Error fetching or parsing orders data: " + error.message);
   }
 }
 
@@ -299,39 +290,30 @@ function fetchOrders(request) {
  * Formats the parsed response from external data source into correct tabular
  * format and returns only the requestedFields
  *
- * @param {Object} parsedResponse The response string from external data source
- *     parsed into an object in a standard format.
+ * @param {Object} jsonResponse The parsed JSON response from the API.
  * @param {Array} requestedFields The fields requested in the getData request.
  * @returns {Array} Array containing rows of data in key-value pairs for each
  *     field.
  */
-function getOrdersData(response, requestedFields) {
-  var data = [];
-  const jsonResponse = JSON.parse(response.getContentText());
+function getOrdersData(jsonResponse, requestedFields) {
   const orders = jsonResponse.items;
-  var data = orders.map((order) => {
+  return orders.map((order) => {
     return formatOrderData(requestedFields, order);
   });
-  return data;
 }
 
 /**
  * Extracts and formats abandoned cart data from the given response.
  *
- * @param {Object} response - The HTTP response object containing the abandoned cart data.
+ * @param {Object} jsonResponse The parsed JSON response from the API.
  * @param {Array} requestedFields - The fields requested for the abandoned cart data.
  * @returns {Array} An array of formatted abandoned cart data.
  */
-
-function getAbandonedCartsData(response, requestedFields) {
-  var data = [];
-  const jsonResponse = JSON.parse(response.getContentText());
+function getAbandonedCartsData(jsonResponse, requestedFields) {
   const abandonedCarts = jsonResponse.items;
-  var data = abandonedCarts.map((abandonedCart) => {
+  return abandonedCarts.map((abandonedCart) => {
     return formatAbandonedCartData(requestedFields, abandonedCart);
-
   });
-  return data;
 }
 // [END get_data]
 
