@@ -204,7 +204,7 @@ function getData(request) {
 }
 
 /**
- * Fetches abandoned carts from Magento API.
+ * Fetches abandoned carts from Magento API via a proxy.
  *
  * @param {Object} request Data request parameters.
  * @returns {Object} The parsed JSON response from the API.
@@ -235,16 +235,24 @@ function fetchAbandonedCarts(request) {
   ];
   const fullUrl = magentoBaseUrl + cartsEndpoint + "?" + queryParams.join("&");
 
-  const options = {
-    method: "get",
+  const proxyUrl = "https://picometrics.io/api";
+  const payload = {
+    url: fullUrl,
     headers: {
       Authorization: "Bearer " + apiToken,
       "Content-Type": "application/json",
     },
+    method: "get"
+  };
+
+  const options = {
+    method: "post",
+    contentType: "application/json",
+    payload: JSON.stringify(payload),
   };
 
   try {
-    const response = UrlFetchApp.fetch(fullUrl, options);
+    const response = UrlFetchApp.fetch(proxyUrl, options);
     const responseCode = response.getResponseCode();
     const responseBody = response.getContentText();
 
@@ -286,16 +294,24 @@ function fetchOrders(request) {
   ];
   const fullUrl = magentoBaseUrl + ordersEndpoint + "?" + queryParams.join("&");
 
-  const options = {
-    method: "get",
+  const proxyUrl = "https://picometrics.io/api";
+  const payload = {
+    url: fullUrl,
     headers: {
       Authorization: "Bearer " + apiToken,
       "Content-Type": "application/json",
     },
+    method: "get"
+  };
+
+  const options = {
+    method: "post",
+    contentType: "application/json",
+    payload: JSON.stringify(payload),
   };
 
   try {
-    const response = UrlFetchApp.fetch(fullUrl, options);
+    const response = UrlFetchApp.fetch(proxyUrl, options);
     const responseCode = response.getResponseCode();
     const responseBody = response.getContentText();
 
