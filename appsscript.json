@@ -23,7 +23,7 @@
         "https://us-central1-picometrics.cloudfunctions.net/vertexAiAgent",
         "https://picometrics.io/api/verify-user",
         "https://picometrics.io/api/verifyUser",
-        "https://picometrics.vercel.app/api",
+        "https://picometrics.io/api/magentoRequestUrl",
         "https://picometrics.io/api/updateConnectedAccounts",
         "https://picometrics.io/api/increment-api-calls"
     ],

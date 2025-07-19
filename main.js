@@ -235,7 +235,7 @@ function fetchAbandonedCarts(request) {
   ];
   const fullUrl = magentoBaseUrl + cartsEndpoint + "?" + queryParams.join("&");
 
-  const proxyUrl = "https://picometrics.io/api";
+  const proxyUrl = "https://picometrics.io/api/magentoRequestUrl";
   const payload = {
     url: fullUrl,
     headers: {
