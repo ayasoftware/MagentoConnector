@@ -2,10 +2,31 @@
   "timeZone": "America/Toronto",
   "oauthScopes": [
     "https://www.googleapis.com/auth/script.external_request",
-    "https://www.googleapis.com/auth/datastudio"
+    "https://www.googleapis.com/auth/userinfo.email",
+    "https://www.googleapis.com/auth/userinfo.profile"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "libraries": [
+      {
+        "userSymbol": "OAuth2",
+        "libraryId": "1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF",
+        "version": "43"
+      }
+    ]
+  },
   "exceptionLogging": "STACKDRIVER",
+   "urlFetchWhitelist": [
+       "https://api.deepseek.com/chat/completions",
+        "https://api.openai.com/v1/chat/completions",
+        "https://generativelanguage.googleapis.com/v1beta2/models/gemini-1.5-flash:generateContent",
+        "https://generativelanguage.googleapis.com/v1beta2/models/gemini-1.5-pro:generateContent",
+        "https://us-central1-picometrics.cloudfunctions.net/vertexAiAgent",
+        "https://picometrics.io/api/verify-user",
+        "https://picometrics.io/api/verifyUser",
+        "https://picometrics.vercel.app/api",
+        "https://picometrics.io/api/updateConnectedAccounts",
+        "https://picometrics.io/api/increment-api-calls"
+    ],
   "runtimeVersion": "V8",
   "dataStudio": {
     "name": "Visualize Magento 2 Metrics ",
@@ -17,6 +38,9 @@
     "shortDescription": "Visualize Magento2 Data",
     "description": "Our Meta Ads Connector for Looker Studio is designed to seamlessly integrate your Magento2 data with Looker Studio, enabling comprehensive data analysis and visualization. Follow this guide to set up and use the connector to enhance your marketing insights.",
     "privacyPolicyUrl": "https://picometrics.io/privacy-policy",
+    "authType": [
+      "OAUTH2"
+    ],
     "templates": {
       "default": "9e5c88b2-042b-4750-8929-5ba572b9c20a"
     }

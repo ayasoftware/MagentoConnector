@@ -120,6 +120,6 @@ function checkSubscription(email, sku) {
     }
     return { grant_access: false };
   } catch (error) {
-    throwUserError(error);
+    throwUserError('error');
   }
 }

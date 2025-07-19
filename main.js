@@ -30,12 +30,34 @@ function sendUserError(message) {
   cc.newUserError().setText(message).throwException();
 }
 
+function getAuthType() {
+  var AuthTypes = cc.AuthType;
+  return cc.newAuthTypeResponse()
+    .setAuthType(AuthTypes.OAUTH2)
+    .build();
+}
+
+function resetAuth() {
+  getOAuthService().reset();
+}
+
+function isAuthValid() {
+  return true;
+}
+
 /**
  * 
  * @returns getConfig
  */
 function getConfig() {
-  var config = cc.getConfig();
+
+  var email = Session.getActiveUser().getEmail();
+  const connectorSku = scriptProperties.getProperty('connectorSku');
+  const accesGranted = checkSubscription(email, connectorSku);
+    if (accesGranted && !accesGranted.grant_access) {
+        sendUserError('Please visit picometrics.io to purchase your subscription to our connector or contact us if you have any questions.');
+    }
+    var config = cc.getConfig();
 
   // Add Magento Base URL configuration
   config
@@ -336,228 +358,6 @@ function formatAbandonedCartData(requestedFields, abandonedCart) {
       default:
         return "";
     }
-    /**
-     {
-    "items": [
-        {
-            "id": 10131,
-            "created_at": "2024-12-24 05:21:58",
-            "updated_at": "2024-12-24 05:36:57",
-            "is_active": true,
-            "is_virtual": false,
-            "items": [
-                {
-                    "item_id": 10600,
-                    "sku": "6236510",
-                    "qty": 1,
-                    "name": "Repose-poignets & Tapis de souris | TUF | NC13 TUF GAMING P1 | ASUS TUF GAMING P1 PORTABLE GAMING MOUSE PAD",
-                    "price": 42.97,
-                    "product_type": "simple",
-                    "quote_id": "10131"
-                },
-                {
-                    "item_id": 10601,
-                    "sku": "7706119",
-                    "qty": 1,
-                    "name": "Portable de jeu 16po | Lenovo Legion Pro 7 16IRX9H | i9-14900HX | 32 Go | NVIDIA GeForce RTX 4090 16 Go | 2 To SSD | Windows 11 Pro | Anglais (USA)",
-                    "price": 4929.97,
-                    "product_type": "simple",
-                    "quote_id": "10131"
-                },
-                {
-                    "item_id": 10604,
-                    "sku": "7926317",
-                    "qty": 1,
-                    "name": "Gaming Mouse | Wireless | Logitech | LIGHTSPEED G G309 | White | Bluetooth",
-                    "price": 111.97,
-                    "product_type": "simple",
-                    "quote_id": "10131"
-                }
-            ],
-            "items_count": 3,
-            "items_qty": 3,
-            "customer": {
-                "id": 460,
-                "group_id": 1,
-                "default_shipping": "225",
-                "created_at": "2024-12-24 05:21:36",
-                "updated_at": "2024-12-24 05:37:38",
-                "created_in": "FR",
-                "email": "tchakountisohd@gmail.com",
-                "firstname": "Bryan Darnel",
-                "lastname": "Tchakounti",
-                "store_id": 5,
-                "website_id": 3,
-                "addresses": [
-                    {
-                        "id": 225,
-                        "customer_id": 460,
-                        "region": {
-                            "region_code": "QC",
-                            "region": "Québec",
-                            "region_id": 76
-                        },
-                        "region_id": 76,
-                        "country_id": "CA",
-                        "street": [
-                            "38 Rue Desmarchais",
-                            "Appartment 3"
-                        ],
-                        "telephone": "4389218652",
-                        "postcode": "J4J 2X9",
-                        "city": "Longueuil",
-                        "firstname": "Bryan Darnel",
-                        "lastname": "Tchakounti",
-                        "default_shipping": true
-                    }
-                ],
-                "disable_auto_group_change": 0,
-                "extension_attributes": {
-                    "is_subscribed": false
-                }
-            },
-            "billing_address": {
-                "id": 22275,
-                "region": "Québec",   //oui
-                "region_id": 76,
-                "region_code": "QC",    //oui
-                "country_id": "CA",
-                "street": [
-                    "38 Rue Desmarchais",  
-                    "Appartment 3"
-                ],
-                "telephone": "4389218652",
-                "postcode": "J4J 2X9",
-                "city": "Longueuil",  //oui
-                "firstname": "Bryan Darnel",
-                "lastname": "Tchakounti",
-                "customer_id": 460,
-                "email": "tchakountisohd@gmail.com",
-                "same_as_billing": 0,
-                "customer_address_id": 225,
-                "save_in_address_book": 1
-            },
-            "orig_order_id": 0,
-            "currency": {
-                "global_currency_code": "CAD",
-                "base_currency_code": "CAD",
-                "store_currency_code": "CAD",
-                "quote_currency_code": "CAD",
-                "store_to_base_rate": 0,
-                "store_to_quote_rate": 0,
-                "base_to_global_rate": 1,
-                "base_to_quote_rate": 1
-            },
-            "customer_is_guest": false,
-            "customer_note_notify": true,
-            "customer_tax_class_id": 3,
-            "store_id": 5,
-            "extension_attributes": {
-                "shipping_assignments": [
-                    {
-                        "shipping": {
-                            "address": {
-                                "id": 22274,
-                                "region": "Québec",
-                                "region_id": 76,
-                                "region_code": "QC",
-                                "country_id": "CA",
-                                "street": [
-                                    "38 Rue Desmarchais",
-                                    "Appartment 3"
-                                ],
-                                "telephone": "4389218652",
-                                "postcode": "J4J 2X9",
-                                "city": "Longueuil",
-                                "firstname": "Bryan Darnel",
-                                "lastname": "Tchakounti",
-                                "customer_id": 460,
-                                "email": "tchakountisohd@gmail.com",
-                                "same_as_billing": 1,
-                                "customer_address_id": 225,
-                                "save_in_address_book": 1
-                            },
-                            "method": "standardshipping_standardshipping"
-                        },
-                        "items": [
-                            {
-                                "item_id": 10600,
-                                "sku": "6236510",
-                                "qty": 1,
-                                "name": "Repose-poignets & Tapis de souris | TUF | NC13 TUF GAMING P1 | ASUS TUF GAMING P1 PORTABLE GAMING MOUSE PAD",
-                                "price": 42.97,
-                                "product_type": "simple",
-                                "quote_id": "10131"
-                            },
-                            {
-                                "item_id": 10601,
-                                "sku": "7706119",
-                                "qty": 1,
-                                "name": "Portable de jeu 16po | Lenovo Legion Pro 7 16IRX9H | i9-14900HX | 32 Go | NVIDIA GeForce RTX 4090 16 Go | 2 To SSD | Windows 11 Pro | Anglais (USA)",
-                                "price": 4929.97,
-                                "product_type": "simple",
-                                "quote_id": "10131"
-                            },
-                            {
-                                "item_id": 10604,
-                                "sku": "7926317",
-                                "qty": 1,
-                                "name": "Gaming Mouse | Wireless | Logitech | LIGHTSPEED G G309 | White | Bluetooth",
-                                "price": 111.97,
-                                "product_type": "simple",
-                                "quote_id": "10131"
-                            }
-                        ]
-                    }
-                ]
-            }
-        }
-    ],
-    "search_criteria": {
-        "filter_groups": [
-            {
-                "filters": [
-                    {
-                        "field": "is_active",
-                        "value": "1",
-                        "condition_type": "eq"
-                    }
-                ]
-            },
-            {
-                "filters": [
-                    {
-                        "field": "store_id",
-                        "value": "0",
-                        "condition_type": "neq"
-                    }
-                ]
-            },
-            {
-                "filters": [
-                    {
-                        "field": "items_count",
-                        "value": "0",
-                        "condition_type": "gt"
-                    }
-                ]
-            },
-            {
-                "filters": [
-                    {
-                        "field": "customer_id",
-                        "value": "null",
-                        "condition_type": "neq"
-                    }
-                ]
-            }
-        ],
-        "page_size": 1
-    },
-    "total_count": 2
-}
-     */
-    
   });
   return { values: row };
 }
